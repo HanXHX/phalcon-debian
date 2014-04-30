@@ -1,0 +1,77 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
+
+ARCH = 32bits
+DEB_BUILD_ARCH = $(shell dpkg-architecture -qDEB_BUILD_ARCH)
+PHP_EXTENSION_DIR = $(shell /usr/bin/php-config5 --extension-dir)
+
+ifeq (amd64, $(DEB_BUILD_ARCH))
+	ARCH = 64bits
+endif
+@echo "Arch = $(ARCH)"
+
+#%:
+#	dh $@ 
+
+configure: configure-stamp
+configure-stamp:
+	dh_testdir
+	cp -a phalcon/build/$(ARCH) build-php5
+	cd build-php5/ && phpize5 && ./configure --enable-phalcon --with-php-config=/usr/bin/php-config5 
+
+build: build-arch build-indep
+
+build-arch: build-stamp
+
+build-indep: build-stamp
+
+build-stamp: configure-stamp 
+	dh_testdir
+	cd build-php5 && $(MAKE) CFLAGS="$(CFLAGS)" CPPFLAGS="$(CPPFLAGS)"
+	touch $@
+
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp configure-stamp
+	rm -rf build-php5/ 
+	rm -rf debian/php5-phalcon
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k 
+#	dh_installdirs
+	mkdir -p mkdir -p debian/php5-phalcon 
+	mkdir -p debian/php5-phalcon$(PHP_EXTENSION_DIR)
+	mkdir -p debian/php5-phalcon/etc/php5/mods-available
+	install -m 644 -o root -g root build-php5/modules/phalcon.so debian/php5-phalcon$(PHP_EXTENSION_DIR)/phalcon.so 
+	install -m 644 -o root -g root debian/phalcon.ini debian/php5-phalcon/etc/php5/mods-available
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_installdebconf
+	#dh_installchangelogs xdebug-*/NEWS
+	dh_installdocs
+	dh_installexamples
+	dh_install
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+
+.PHONY: build clean binary-indep binary-arch binary install configure 

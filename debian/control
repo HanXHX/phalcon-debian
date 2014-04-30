@@ -1,0 +1,15 @@
+Source: php5-phalcon
+Section: php
+Priority: optional
+Maintainer: Emilien Mantel <emilien.mantel@debianiste.org>
+Build-Depends: debhelper (>= 8.0.0), php5-dev, libpcre3-dev, gcc, make, php5-mysql
+Standards-Version: 3.9.4
+Homepage: http://phalconphp.com
+#Vcs-Git: https://github.com/phalcon/cphalcon.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/php5-phalcon.git;a=summary
+
+Package: php5-phalcon
+Architecture: any
+Depends: ${misc:Depends}
+Description: Phalcon Module for PHP 5 
+ <insert long description, indented with spaces>
