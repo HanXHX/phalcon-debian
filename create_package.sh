@@ -16,3 +16,6 @@ wget $URL_SOURCE -O $ARCHIVE
 echo "2) Ungzip"
 tar xfz $ARCHIVE $DEST_FOLDER
 mv cphalcon* phalcon
+
+echo "3) Build package"
+dpkg-buildpackage -b

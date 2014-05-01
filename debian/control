@@ -10,6 +10,7 @@ Homepage: http://phalconphp.com
 
 Package: php5-phalcon
 Architecture: any
-Depends: ${misc:Depends}
+Depends: ${misc:Depends}, php5
+Recommends: php5-mcrypt, openssl (>= 1.0.1e), php5-mongo 
 Description: Phalcon Module for PHP 5 
- <insert long description, indented with spaces>
+ Phalcon is a PHP framework implemented as a C extension offering high performance and lower resource consumption. 

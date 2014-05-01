@@ -4,16 +4,14 @@
 export DH_VERBOSE=1
 
 ARCH = 32bits
-DEB_BUILD_ARCH = $(shell dpkg-architecture -qDEB_BUILD_ARCH)
+DEB_BUILD_ARCH_BITS = $(shell dpkg-architecture -qDEB_BUILD_ARCH_BITS)
 PHP_EXTENSION_DIR = $(shell /usr/bin/php-config5 --extension-dir)
 
-ifeq (amd64, $(DEB_BUILD_ARCH))
+ifeq (64, $(DEB_BUILD_ARCH_BITS))
 	ARCH = 64bits
 endif
 @echo "Arch = $(ARCH)"
 
-#%:
-#	dh $@ 
 
 configure: configure-stamp
 configure-stamp:
@@ -29,14 +27,11 @@ build-indep: build-stamp
 
 build-stamp: configure-stamp 
 	dh_testdir
-	cd build-php5 && $(MAKE) CFLAGS="$(CFLAGS)" CPPFLAGS="$(CPPFLAGS)"
-	touch $@
-
+	cd build-php5 && $(MAKE)
 
 clean:
 	dh_testdir
 	dh_testroot
-	rm -f build-stamp configure-stamp
 	rm -rf build-php5/ 
 	rm -rf debian/php5-phalcon
 	dh_clean
@@ -45,8 +40,6 @@ install: build
 	dh_testdir
 	dh_testroot
 	dh_clean -k 
-#	dh_installdirs
-	mkdir -p mkdir -p debian/php5-phalcon 
 	mkdir -p debian/php5-phalcon$(PHP_EXTENSION_DIR)
 	mkdir -p debian/php5-phalcon/etc/php5/mods-available
 	install -m 644 -o root -g root build-php5/modules/phalcon.so debian/php5-phalcon$(PHP_EXTENSION_DIR)/phalcon.so 
