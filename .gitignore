@@ -2,5 +2,5 @@
 debian/*.swp
 debian/php5-phalcon
 phalcon
-phalcon.tar.gz
+*.tar.gz
 build-php5

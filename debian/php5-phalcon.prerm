@@ -7,7 +7,7 @@ set -e
 
 case "$1" in
     remove|upgrade|deconfigure)
-	php5dismod phalcon
+		php5dismod phalcon
     ;;
 
     failed-upgrade)

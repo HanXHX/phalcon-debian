@@ -16,7 +16,7 @@ endif
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
-	cp -a phalcon/build/$(ARCH) build-php5
+	cp -a phalcon*/build/$(ARCH) build-php5
 	cd build-php5/ && phpize5 && ./configure --enable-phalcon --with-php-config=/usr/bin/php-config5 
 
 build: build-arch build-indep
@@ -32,18 +32,20 @@ build-stamp: configure-stamp
 clean:
 	dh_testdir
 	dh_testroot
-	rm -rf build-php5/ 
-	rm -rf debian/php5-phalcon
+	rm -f build-stamp configure-stamp
+	rm -rf build-php5
 	dh_clean
 
 install: build
 	dh_testdir
 	dh_testroot
 	dh_clean -k 
-	mkdir -p debian/php5-phalcon$(PHP_EXTENSION_DIR)
+	dh_installdirs
+
+	cd build-php5 && $(MAKE) INSTALL_ROOT=$(CURDIR)/debian/php5-phalcon install 
+
 	mkdir -p debian/php5-phalcon/etc/php5/mods-available
-	install -m 644 -o root -g root build-php5/modules/phalcon.so debian/php5-phalcon$(PHP_EXTENSION_DIR)/phalcon.so 
-	install -m 644 -o root -g root debian/phalcon.ini debian/php5-phalcon/etc/php5/mods-available
+	echo "zend_extension=phalcon.so" > debian/php5-phalcon/etc/php5/mods-available/phalcon.ini
 
 binary-indep: build install
 
