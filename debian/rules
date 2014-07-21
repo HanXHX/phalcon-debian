@@ -3,70 +3,50 @@
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
 
-ARCH = 32bits
-DEB_BUILD_ARCH_BITS = $(shell dpkg-architecture -qDEB_BUILD_ARCH_BITS)
-PHP_EXTENSION_DIR = $(shell /usr/bin/php-config5 --extension-dir)
+export CFLAGS  += -fvisibility=hidden -DPHALCON_RELEASE -march=native -mtune=native -O2 -finline-functions -fomit-frame-pointer
 
-ifeq (64, $(DEB_BUILD_ARCH_BITS))
-	ARCH = 64bits
+PHALCON_DIR    = build/safe
+DEB_HOST_ARCH ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+PHPAPI = $(shell php-config --phpapi)
+
+ifeq ($(DEB_HOST_ARCH),$(filter $(DEB_HOST_ARCH),i386))
+	PHALCON_DIR = phalcon/build/32bits
 endif
-@echo "Arch = $(ARCH)"
+
+ifeq ($(DEB_HOST_ARCH),$(filter $(DEB_HOST_ARCH),amd64))
+	PHALCON_DIR = phalcon/build/64bits
+endif
 
 
-configure: configure-stamp
-configure-stamp:
-	dh_testdir
-	cp -a phalcon*/build/$(ARCH) build-php5
-	cd build-php5/ && phpize5 && ./configure --enable-phalcon --with-php-config=/usr/bin/php-config5 
+%:
+	dh $@
 
-build: build-arch build-indep
+override_dh_auto_configure:
+	(cd $(PHALCON_DIR); phpize5; ./configure --enable-phalcon=shared)
 
-build-arch: build-stamp
+override_dh_auto_build:
+	$(MAKE) -C $(PHALCON_DIR)
+	echo "$(PHALCON_DIR)/modules/phalcon.so usr/lib/php5/$(PHPAPI)" > debian/php5-phalcon.install
+	echo "debian/phalcon.ini etc/php5/mods-available" >> debian/php5-phalcon.install
 
-build-indep: build-stamp
+override_dh_auto_clean:
+	dh_auto_clean
+	( \
+		cd $(PHALCON_DIR); \
+		[ -f Makefile ] && $(MAKE) distclean; \
+		phpize5 --clean; \
+		rm -f tmp-php.ini; \
+	)
 
-build-stamp: configure-stamp 
-	dh_testdir
-	cd build-php5 && $(MAKE)
-
-clean:
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp configure-stamp
-	rm -rf build-php5
+override_dh_clean:
+	rm -f debian/php5-phalcon.substvars
+	rm -f debian/php5-phalcon.install
 	dh_clean
 
-install: build
-	dh_testdir
-	dh_testroot
-	dh_clean -k 
-	dh_installdirs
+override_dh_auto_install:
+	$(MAKE) -C $(PHALCON_DIR) install INSTALL_ROOT=../../../debian/php5-phalcon
 
-	cd build-php5 && $(MAKE) INSTALL_ROOT=$(CURDIR)/debian/php5-phalcon install 
-
-	mkdir -p debian/php5-phalcon/etc/php5/mods-available
-	echo "zend_extension=phalcon.so" > debian/php5-phalcon/etc/php5/mods-available/phalcon.ini
-
-binary-indep: build install
-
-binary-arch: build install
-	dh_testdir
-	dh_testroot
-	dh_installdebconf
-	#dh_installchangelogs xdebug-*/NEWS
-	dh_installdocs
-	dh_installexamples
-	dh_install
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
-	dh_installdeb
-	dh_shlibdeps
+override_dh_gencontrol:
+	echo "php:Depends=phpapi-`php-config5 --phpapi`" >> debian/php5-phalcon.substvars
 	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
 
-binary: binary-indep binary-arch
-
-.PHONY: build clean binary-indep binary-arch binary install configure 

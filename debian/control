@@ -5,12 +5,14 @@ Maintainer: Emilien Mantel <emilien.mantel@debianiste.org>
 Build-Depends: debhelper (>= 8.0.0), php5-dev, libpcre3-dev, gcc, make, php5-mysql
 Standards-Version: 3.9.4
 Homepage: http://phalconphp.com
-#Vcs-Git: https://github.com/phalcon/cphalcon.git
-#Vcs-Browser: http://git.debian.org/?p=collab-maint/php5-phalcon.git;a=summary
+Vcs-Git: git://github.com/phalcon/cphalcon.git
+Vcs-Browser: https://github.com/phalcon/cphalcon
 
 Package: php5-phalcon
-Architecture: any
-Depends: ${misc:Depends}, php5
-Recommends: php5-mcrypt, openssl (>= 1.0.1e), php5-mongo 
+Architecture: i386 amd64 
+Depends: ${shlibs:Depends}, ${php:Depends}, ${misc:Depends}, php5
+Recommends: php5-mcrypt, openssl (>= 1.0.1e)
+Suggests: php5-mysql, php5-sqlite, php5-pgsql, php5-mongo, php5-memcache
 Description: Phalcon Module for PHP 5 
- Phalcon is a PHP framework implemented as a C extension offering high performance and lower resource consumption. 
+ Phalcon is a PHP framework implemented as a C extension offering high
+ performance and lower resource consumption. 
