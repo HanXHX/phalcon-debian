@@ -5,5 +5,5 @@ before_install:
 script:
   - make
   - dpkg-buildpackage -us -uc -b 
-  - dpkg -i ../php5-phalcon*.deb
+  - sudo dpkg -i ../php5-phalcon*.deb
   - php -i | grep phalcon | grep -q enabled
