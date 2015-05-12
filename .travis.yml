@@ -1,0 +1,9 @@
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq debhelper php5-dev libpcre3-dev php5-mysql php5-cli 
+
+script:
+  - make
+  - dpkg-buildpackage -us -uc -b 
+  - dpkg -i ../php5-phalcon*.deb
+  - php -i | grep phalcon | grep -q enabled
