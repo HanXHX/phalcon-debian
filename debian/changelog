@@ -2,7 +2,7 @@ php5-phalcon (2.0.1-2) unstable; urgency=low
 
   * New upstream version: 2.0.1
 
- -- Emilien Mantel <emilien.mantel@debianiste.org>  Tue, 11 May 2015 19:28:18 +0200
+ -- Emilien Mantel <emilien.mantel@debianiste.org>  Mon, 11 May 2015 19:28:18 +0200
 
 php5-phalcon (1.3.1-1) unstable; urgency=low
 
