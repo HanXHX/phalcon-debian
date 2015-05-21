@@ -10,11 +10,11 @@ DEB_HOST_ARCH ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
 PHPAPI = $(shell php-config --phpapi)
 
 ifeq ($(DEB_HOST_ARCH),$(filter $(DEB_HOST_ARCH),i386))
-	PHALCON_DIR = phalcon/build/32bits
+	PHALCON_DIR = build/32bits
 endif
 
 ifeq ($(DEB_HOST_ARCH),$(filter $(DEB_HOST_ARCH),amd64))
-	PHALCON_DIR = phalcon/build/64bits
+	PHALCON_DIR = build/64bits
 endif
 
 
