@@ -20,6 +20,7 @@
 namespace Phalcon\Db;
 
 use Phalcon\Db;
+use Phalcon\Db\ColumnInterface;
 use Phalcon\Events\EventsAwareInterface;
 use Phalcon\Events\ManagerInterface;
 
@@ -182,7 +183,7 @@ abstract class Adapter implements EventsAwareInterface
 	 * @param array bindTypes
 	 * @return array
 	 */
-	public function fetchOne(string! sqlQuery, var fetchMode = 2, var bindParams = null, var bindTypes = null)
+	public function fetchOne(string! sqlQuery, var fetchMode = Db::FETCH_BOTH, var bindParams = null, var bindTypes = null)
 	{
 		var result;
 		let result = this->{"query"}(sqlQuery, bindParams, bindTypes);
@@ -759,9 +760,9 @@ abstract class Adapter implements EventsAwareInterface
 	/**
 	 * Modifies a table column based on a definition
 	 */
-	public function modifyColumn(string! tableName, string! schemaName, <ColumnInterface> column) -> boolean
+	public function modifyColumn(string! tableName, string! schemaName, <ColumnInterface> column, <ColumnInterface> currentColumn = null) -> boolean
 	{
-		return this->{"execute"}(this->_dialect->modifyColumn(tableName, schemaName, column));
+		return this->{"execute"}(this->_dialect->modifyColumn(tableName, schemaName, column, currentColumn));
 	}
 
 	/**
