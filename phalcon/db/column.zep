@@ -43,7 +43,6 @@ use Phalcon\Db\ColumnInterface;
  * //add column to existing table
  * $connection->addColumn("robots", null, $column);
  *</code>
- *
  */
 class Column implements ColumnInterface
 {
@@ -98,8 +97,42 @@ class Column implements ColumnInterface
 	 *
 	 */
 	const TYPE_DOUBLE = 9;
-	
-	
+
+	/**
+	 * Tinyblob abstract data type
+	 */
+	const TYPE_TINYBLOB = 10;
+
+	/**
+	 * Blob abstract data type
+	 */
+	const TYPE_BLOB = 11;
+
+	/**
+	 * Mediumblob abstract data type
+	 */
+	const TYPE_MEDIUMBLOB = 12;
+
+	/**
+	 * Longblob abstract data type
+	 */
+	const TYPE_LONGBLOB = 13;
+
+	/**
+	 * Big integer abstract type
+	 */
+	const TYPE_BIGINTEGER = 14;
+
+	/**
+	 * Json abstract type
+	 */
+	const TYPE_JSON = 15;
+
+	/**
+	 * Jsonb abstract type
+	 */
+	const TYPE_JSONB = 16;
+
 	/**
 	 * Bind Type Null
 	 */
@@ -114,6 +147,11 @@ class Column implements ColumnInterface
 	 * Bind Type String
 	 */
 	const BIND_PARAM_STR = 2;
+
+	/**
+	 * Bind Type Blob
+	 */
+	const BIND_PARAM_BLOB = 3;
 
 	/**
 	 * Bind Type Bool
@@ -286,10 +324,18 @@ class Column implements ColumnInterface
 		 * Check if the column has a decimal scale
 		 */
 		if fetch scale, definition["scale"] {
-			if type == self::TYPE_INTEGER || type == self::TYPE_FLOAT || type == self::TYPE_DECIMAL || type == self::TYPE_DOUBLE {
-				let this->_scale = scale;
-			} else {
-				throw new Exception("Column type does not support scale parameter");
+			switch type {
+
+				case self::TYPE_INTEGER:
+				case self::TYPE_FLOAT:
+				case self::TYPE_DECIMAL:
+				case self::TYPE_DOUBLE:
+				case self::TYPE_BIGINTEGER:
+					let this->_scale = scale;
+					break;
+
+				default:
+					throw new Exception("Column type does not support scale parameter");
 			}
 		}
 
@@ -318,14 +364,19 @@ class Column implements ColumnInterface
 		 * Check if the field is auto-increment/serial
 		 */
 		if fetch autoIncrement, definition["autoIncrement"] {
-			if autoIncrement {
-				if type == self::TYPE_INTEGER {
-					let this->_autoIncrement = true;
-				} else {
-					throw new Exception("Column type cannot be auto-increment");
-				}
-			} else {
+			if !autoIncrement {
 				let this->_autoIncrement = false;
+			} else {
+				switch type {
+
+					case self::TYPE_INTEGER:
+					case self::TYPE_BIGINTEGER:
+						let this->_autoIncrement = true;
+						break;
+
+					default:
+						throw new Exception("Column type cannot be auto-increment");
+				}
 			}
 		}
 
@@ -463,8 +514,16 @@ class Column implements ColumnInterface
 		}
 
 		if fetch scale, data["_scale"] {
-			if definition["type"] == self::TYPE_INTEGER || definition["type"] == self::TYPE_FLOAT || definition["type"] == self::TYPE_DECIMAL {
-				let definition["scale"] = scale;
+			
+			switch definition["type"] {
+
+				case self::TYPE_INTEGER:
+				case self::TYPE_FLOAT:
+				case self::TYPE_DECIMAL:
+				case self::TYPE_DOUBLE:
+				case self::TYPE_BIGINTEGER:
+					let definition["scale"] = scale;
+					break;
 			}
 		}
 

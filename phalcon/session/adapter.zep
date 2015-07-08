@@ -53,8 +53,6 @@ abstract class Adapter
 
 	/**
 	 * Starts the session (if headers are already sent the session will not be started)
-	 *
-	 * @return boolean
 	 */
 	public function start() -> boolean
 	{
@@ -72,12 +70,10 @@ abstract class Adapter
 	 * Sets session's options
 	 *
 	 *<code>
-	 *	session->setOptions(array(
+	 *	$session->setOptions(array(
 	 *		'uniqueId' => 'my-private-app'
 	 *	));
 	 *</code>
-	 *
-	 * @param array options
 	 */
 	public function setOptions(array! options)
 	{
@@ -92,12 +88,26 @@ abstract class Adapter
 
 	/**
 	 * Get internal options
-	 *
-	 * @return array
 	 */
-	public function getOptions()
+	public function getOptions() -> array
 	{
 		return this->_options;
+	}
+
+	/**
+	 * Set session name
+	 */
+	public function setName(string name)
+	{
+	    session_name(name);
+	}
+
+	/**
+	 * Get session name
+	 */
+	public function getName()
+	{
+	    return session_name();
 	}
 
 	/**
@@ -126,7 +136,7 @@ abstract class Adapter
 	 * Sets a session variable in an application context
 	 *
 	 *<code>
-	 *	session->set('auth', 'yes');
+	 *	$session->set('auth', 'yes');
 	 *</code>
 	 *
 	 * @param string index
@@ -143,8 +153,6 @@ abstract class Adapter
 	 *<code>
 	 *	var_dump($session->has('auth'));
 	 *</code>
-	 *
-	 * @param string index
 	 */
 	public function has(string index) -> boolean
 	{
@@ -174,15 +182,13 @@ abstract class Adapter
 	{
 		return session_id();
 	}
-	
+
 	/**
 	 * Set the current session id
 	 *
 	 *<code>
 	 *	$session->setId($id);
 	 *</code>
-	 *
-	 * @param string id
 	 */
 	public function setId(string id)
 	{
@@ -269,8 +275,6 @@ abstract class Adapter
 
 	/**
 	 * Alias: Check whether a session variable is set in an application context
-	 *
-	 * @param string index
 	 */
 	public function __isset(string index) -> boolean
 	{

@@ -31,6 +31,25 @@ abstract class Dialect implements DialectInterface
 
 	protected _escapeChar;
 
+	protected _customFunctions;
+
+	/**
+	 * Registers custom SQL functions
+	 */
+	public function registerCustomFunction(string name, callable customFunction) -> <Dialect>
+	{
+		let this->_customFunctions[name] = customFunction;
+		return this;
+	}
+
+	/**
+	 * Returns registered functions
+	 */
+	public function getCustomFunctions() -> array
+	{
+		return this->_customFunctions;
+	}
+
 	/**
 	 * Escape identifiers
 	 */
@@ -213,9 +232,10 @@ abstract class Dialect implements DialectInterface
 	/**
 	 * Transforms an intermediate representation for a expression into a database system valid expression
 	 */
-	public function getSqlExpression(array! expression, var escapeChar = null) -> string
+	public function getSqlExpression(array! expression, string escapeChar = null) -> string
 	{
-		var type;
+		var type, times, placeholders, value;
+		int i;
 
 		if !fetch type, expression["type"] {
 			throw new Exception("Invalid SQL expression");
@@ -245,8 +265,18 @@ abstract class Dialect implements DialectInterface
 			 * Resolve literal OR placeholder expressions
 			 */
 			case "literal":
-			case "placeholder":
 				return expression["value"];
+
+			case "placeholder":
+				if fetch times, expression["times"] {
+					let placeholders = [], value = expression["value"];
+					for i in range(1, times) {
+						let placeholders[] = value . (i - 1);
+					}
+					return join(", ", placeholders);
+				} else {
+					return expression["value"];
+				}
 
 			/**
 			 * Resolve binary operations expressions
@@ -285,6 +315,12 @@ abstract class Dialect implements DialectInterface
 				return this->getSqlExpressionAll(expression, escapeChar);
 
 			/**
+			 * Resolve SELECT
+			 */
+			case "select":
+				return "(" . this->select(expression["value"]) . ")";
+
+			/**
 			 * Resolve CAST of values
 			 */
 			case "cast":
@@ -296,11 +332,8 @@ abstract class Dialect implements DialectInterface
 			case "convert":
 				return this->getSqlExpressionConvertValue(expression, escapeChar);
 
-			/**
-			 * Resolve SELECT
-			 */
-			case "select":
-				return "(" . this->select(expression["value"]) . ")";
+			case "case":
+				return this->getSqlExpressionCase(expression, escapeChar);
 		}
 
 		/**
@@ -344,8 +377,8 @@ abstract class Dialect implements DialectInterface
 	 */
 	public function select(array! definition) -> string
 	{
-		var tables, columns, sql;
-		var distinct, joins, where, groupBy, having, orderBy, limit;
+		var tables, columns, sql, distinct, joins, where,
+			groupBy, having, orderBy, limit, forUpdate;
 
 		if !fetch tables, definition["tables"] {
 			throw new Exception("The index 'tables' is required in the definition array");
@@ -417,6 +450,13 @@ abstract class Dialect implements DialectInterface
 		 */
 		if fetch limit, definition["limit"] && limit {
 			let sql = this->getSqlExpressionLimit(["sql": sql, "value": limit]);
+		}
+
+		/**
+		 * Resolve FOR UPDATE
+		 */
+		if fetch forUpdate, definition["forUpdate"] && forUpdate {
+			let sql .= "FOR UPDATE";
 		}
 
 		return sql;
@@ -495,7 +535,7 @@ abstract class Dialect implements DialectInterface
 			"type": "all"
 		];
 
-		if (fetch domain, expression["balias"] || fetch domain, expression["domain"]) && domain != "" {
+		if (fetch domain, expression["column"] || fetch domain, expression["domain"]) && domain != "" {
 			let objectExpression["domain"] = domain;
 		}
 
@@ -562,7 +602,13 @@ abstract class Dialect implements DialectInterface
 	 */
 	protected final function getSqlExpressionFunctionCall(array! expression, string escapeChar = null) -> string
 	{
-		var arguments;
+		var name, customFunction, arguments;
+
+		let name = expression["name"];
+
+		if fetch customFunction, this->_customFunctions[name] {
+			return {customFunction}(this, expression, escapeChar);
+		}
 
 		if fetch arguments, expression["arguments"] && typeof arguments == "array" {
 
@@ -573,13 +619,13 @@ abstract class Dialect implements DialectInterface
 			], escapeChar);
 
 			if isset expression["distinct"] && expression["distinct"] {
-				return expression["name"] . "(DISTINCT " . arguments . ")";
+				return name . "(DISTINCT " . arguments . ")";
 			}
 
-			return expression["name"] . "(" . arguments . ")";
+			return name . "(" . arguments . ")";
 		}
 
-		return expression["name"] . "()";
+		return name . "()";
 	}
 
 	/**
@@ -651,6 +697,29 @@ abstract class Dialect implements DialectInterface
 	}
 
 	/**
+	 * Resolve CASE expressions
+	 */
+	protected final function getSqlExpressionCase(array! expression, string escapeChar = null) -> string
+	{
+		var sql, whenClause;
+
+		let sql = "CASE " . this->getSqlExpression(expression["expr"], escapeChar);
+
+		for whenClause in expression["when-clauses"] {
+			if whenClause["type"] == "when" {
+				let sql .= " WHEN " .
+						this->getSqlExpression(whenClause["expr"], escapeChar) .
+						" THEN " .
+						this->getSqlExpression(whenClause["then"], escapeChar);
+			} else {
+				let sql .= " ELSE " . this->getSqlExpression(whenClause["expr"], escapeChar);
+			}
+		}
+
+		return sql . " END";
+	}
+
+	/**
 	 * Resolve a FROM clause
 	 */
 	protected final function getSqlExpressionFrom(var expression, string escapeChar = null) -> string
@@ -679,20 +748,19 @@ abstract class Dialect implements DialectInterface
 	 */
 	protected final function getSqlExpressionJoins(var expression, string escapeChar = null) -> string
 	{
-		var join, sql = "", joinCondition, joinTable, joinType = "", joinConditionsArray;
+		var condition, join, sql = "", joinCondition, joinTable, joinType = "", joinConditionsArray;
 
 		for join in expression {
 
 			/**
 			 * Check if the join has conditions
 			 */
-			if fetch joinConditionsArray, join["conditions"] && !empty joinConditionsArray {
+			if fetch joinConditionsArray, join["conditions"] && !empty joinConditionsArray {				
 
 				if !isset joinConditionsArray[0] {
 					let joinCondition = this->getSqlExpression(joinConditionsArray, escapeChar);
 				} else {
 
-					var condition;
 					let joinCondition = [];
 
 					for condition in joinConditionsArray {

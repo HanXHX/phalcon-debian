@@ -387,7 +387,7 @@ class Simple extends Injectable implements ViewBaseInterface
 	 * @param string partialPath
 	 * @param array  params
 	 */
-	public function partial(string! partialPath, params = null)
+	public function partial(string! partialPath, var params = null)
 	{
 		var viewParams, mergedParams;
 
@@ -627,10 +627,8 @@ class Simple extends Injectable implements ViewBaseInterface
 
 	/**
 	 * Returns cached output from another view stage
-	 *
-	 * @return string
 	 */
-	public function getContent()
+	public function getContent() -> string
 	{
 		return this->_content;
 	}

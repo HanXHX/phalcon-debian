@@ -491,6 +491,24 @@ class ViewEnginesVoltTest extends PHPUnit_Framework_TestCase
 		$this->assertTrue(is_array($intermediate));
 		$this->assertEquals(count($intermediate), 1);
 
+		$intermediate = $volt->parse('{% set a[0] = 1 %}');
+		$this->assertTrue(is_array($intermediate));
+
+		$intermediate = $volt->parse('{% set a[0][1] = 1 %}');
+		$this->assertTrue(is_array($intermediate));
+
+		$intermediate = $volt->parse('{% set a.y = 1 %}');
+		$this->assertTrue(is_array($intermediate));
+
+		$intermediate = $volt->parse('{% set a.y.x = 1 %}');
+		$this->assertTrue(is_array($intermediate));
+
+		$intermediate = $volt->parse('{% set a[0].y = 1 %}');
+		$this->assertTrue(is_array($intermediate));
+
+		$intermediate = $volt->parse('{% set a.y[0] = 1 %}');
+		$this->assertTrue(is_array($intermediate));
+
 		$intermediate = $volt->parse('{% do 1 %}');
 		$this->assertTrue(is_array($intermediate));
 		$this->assertEquals(count($intermediate), 1);
@@ -1085,6 +1103,9 @@ class ViewEnginesVoltTest extends PHPUnit_Framework_TestCase
 		$compilation = $volt->compileString('{% cache somekey %} hello {% endcache %}');
 		$this->assertEquals($compilation, '<?php $_cache[$somekey] = $this->di->get(\'viewCache\'); $_cacheKey[$somekey] = $_cache[$somekey]->start($somekey); if ($_cacheKey[$somekey] === null) { ?> hello <?php $_cache[$somekey]->save($somekey); } else { echo $_cacheKey[$somekey]; } ?>');
 
+		$compilation = $volt->compileString('{% set lifetime = 500 %}{% cache somekey lifetime %} hello {% endcache %}');
+		$this->assertEquals($compilation, '<?php $lifetime = 500; ?><?php $_cache[$somekey] = $this->di->get(\'viewCache\'); $_cacheKey[$somekey] = $_cache[$somekey]->start($somekey, $lifetime); if ($_cacheKey[$somekey] === null) { ?> hello <?php $_cache[$somekey]->save($somekey, null, $lifetime); } else { echo $_cacheKey[$somekey]; } ?>');
+
 		$compilation = $volt->compileString('{% cache somekey 500 %} hello {% endcache %}');
 		$this->assertEquals($compilation, '<?php $_cache[$somekey] = $this->di->get(\'viewCache\'); $_cacheKey[$somekey] = $_cache[$somekey]->start($somekey, 500); if ($_cacheKey[$somekey] === null) { ?> hello <?php $_cache[$somekey]->save($somekey, null, 500); } else { echo $_cacheKey[$somekey]; } ?>');
 
@@ -1096,8 +1117,10 @@ class ViewEnginesVoltTest extends PHPUnit_Framework_TestCase
 		$compilation = $volt->compileString('{# some comment #}{{ "hello" }}{# other comment }}');
 		$this->assertEquals($compilation, "<?php echo 'hello'; ?>");
 
-		//
-
+		//Autoescape from options
+		$volt->setOption("autoescape", true);
+		$compilation = $volt->compileString('{{ "hello" }}{% autoescape true %}{{ "hello" }}{% autoescape false %}{{ "hello" }}{% endautoescape %}{{ "hello" }}{% endautoescape %}{{ "hello" }}');
+		$this->assertEquals($compilation, "<?php echo \$this->escaper->escapeHtml('hello'); ?><?php echo \$this->escaper->escapeHtml('hello'); ?><?php echo 'hello'; ?><?php echo \$this->escaper->escapeHtml('hello'); ?><?php echo \$this->escaper->escapeHtml('hello'); ?>");
 	}
 
 	public function testVoltUsersFunctions()

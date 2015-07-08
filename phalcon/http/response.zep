@@ -20,7 +20,6 @@
 namespace Phalcon\Http;
 
 use Phalcon\DiInterface;
-use Phalcon\Http\ResponseInterface;
 use Phalcon\Http\Response\Exception;
 use Phalcon\Http\Response\HeadersInterface;
 use Phalcon\Http\Response\CookiesInterface;
@@ -499,9 +498,9 @@ class Response implements ResponseInterface, InjectionAwareInterface
 	 * @param int jsonOptions
 	 * @return Phalcon\Http\Response
 	 */
-	public function setJsonContent(var content, jsonOptions = 0) -> <Response>
+	public function setJsonContent(var content, jsonOptions = 0, depth = 512) -> <Response>
 	{
-		let this->_content = json_encode(content, jsonOptions);
+		let this->_content = json_encode(content, jsonOptions, depth);
 		return this;
 	}
 
