@@ -29,8 +29,8 @@ use Phalcon\Mvc\Model\ResultsetInterface;
 /**
  * Phalcon\Mvc\Model\Resultset
  *
- * This component allows to Phalcon\Mvc\Model returns large resulsets with the minimum memory consumption
- * Resulsets can be traversed using a standard foreach or a while statement. If a resultset is serialized
+ * This component allows to Phalcon\Mvc\Model returns large resultsets with the minimum memory consumption
+ * Resultsets can be traversed using a standard foreach or a while statement. If a resultset is serialized
  * it will dump all the rows into a big array. Then unserialize will retrieve the rows as they were before
  * serializing.
  *
@@ -221,10 +221,10 @@ abstract class Resultset
 			let result = this->_result;
 			if this->_row === null && this->_pointer === 0 {
 				/**
-				* Fresh result-set: Query was already executed in model\query::_executeSelect()
-				* The first row is available with fetch
-				*/
-				let this->_row = result->$fetch(result);
+				 * Fresh result-set: Query was already executed in model\query::_executeSelect()
+				 * The first row is available with fetch
+				 */
+				let this->_row = result->$fetch();
 			}
 
 			if this->_pointer > position {
@@ -233,7 +233,7 @@ abstract class Resultset
 				* It is not possible to rewind. Re-execute query with dataSeek
 				*/
 				result->dataSeek(position);
-				let this->_row = result->$fetch(result);
+				let this->_row = result->$fetch();
 				let this->_pointer = position;
 			}
 
@@ -243,7 +243,7 @@ abstract class Resultset
 				* seek forward until the requested position is reached.
 				* We do not need to re-execute the query!
 				*/
-				let this->_row = result->$fetch(result);
+				let this->_row = result->$fetch();
 				let this->_pointer++;
 			}
 
@@ -286,7 +286,7 @@ abstract class Resultset
 	}
 
 	/**
-	 * Resulsets cannot be changed. It has only been implemented to meet the definition of the ArrayAccess interface
+	 * Resultsets cannot be changed. It has only been implemented to meet the definition of the ArrayAccess interface
 	 *
 	 * @param int index
 	 * @param Phalcon\Mvc\ModelInterface value
@@ -297,7 +297,7 @@ abstract class Resultset
 	}
 
 	/**
-	 * Resulsets cannot be changed. It has only been implemented to meet the definition of the ArrayAccess interface
+	 * Resultsets cannot be changed. It has only been implemented to meet the definition of the ArrayAccess interface
 	 */
 	public function offsetUnset(int offset)
 	{

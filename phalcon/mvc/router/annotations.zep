@@ -242,7 +242,8 @@ class Annotations extends Router
 		<Annotation> annotation)
 	{
 		var isRoute, name, actionName, routePrefix, paths, value, uri,
-			route, methods, converts, param, convert, conversorParam, routeName;
+			route, methods, converts, param, convert, conversorParam, routeName,
+			beforeMatch;
 
 		let isRoute = false, methods = null;
 
@@ -252,12 +253,30 @@ class Annotations extends Router
 		 * Find if the route is for adding routes
 		 */
 		switch name {
-			case "Route": let isRoute = true; break;
-			case "Get": let isRoute = true, methods = "GET"; break;
-			case "Post": let isRoute = true, methods = "POST"; break;
-			case "Put": let isRoute = true, methods = "PUT"; break;
-			case "Delete": let isRoute = true, methods = "DELETE"; break;
-			case "Options": let isRoute = true, methods = "OPTIONS"; break;
+
+			case "Route":
+				let isRoute = true;
+				break;
+
+			case "Get":
+				let isRoute = true, methods = "GET";
+				break;
+
+			case "Post":
+				let isRoute = true, methods = "POST";
+				break;
+
+			case "Put":
+				let isRoute = true, methods = "PUT";
+				break;
+
+			case "Delete":
+				let isRoute = true, methods = "DELETE";
+				break;
+
+			case "Options":
+				let isRoute = true, methods = "OPTIONS";
+				break;
 		}
 
 		if isRoute === true {
@@ -350,6 +369,14 @@ class Annotations extends Router
 				}
 			}
 
+			/**
+			 * Add the conversors
+			 */
+			let beforeMatch = annotation->getNamedArgument("beforeMatch");
+			if typeof beforeMatch == "array" || typeof beforeMatch == "string" {
+				route->beforeMatch(beforeMatch);
+			}
+
 			let routeName = annotation->getNamedArgument("name");
 			if typeof routeName == "string" {
 				route->setName(routeName);
@@ -357,7 +384,6 @@ class Annotations extends Router
 
 			return true;
 		}
-
 	}
 
 	/**
@@ -383,6 +409,6 @@ class Annotations extends Router
 	 */
 	public function getResources()
 	{
-		return this->_handlers;
+		return (array) this->_handlers;
 	}
 }

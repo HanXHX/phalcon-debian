@@ -1,19 +1,19 @@
 
 /*
  +------------------------------------------------------------------------+
- | Phalcon Framework													  |
+ | Phalcon Framework							  |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)	   |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)	  |
  +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled	 |
- | with this package in the file docs/LICENSE.txt.						|
- |																		|
- | If you did not receive a copy of the license and are unable to		 |
- | obtain it through the world-wide-web, please send an email			 |
- | to license@phalconphp.com so we can send you a copy immediately.	   |
+ | This source file is subject to the New BSD License that is bundled	  |
+ | with this package in the file docs/LICENSE.txt.			  |
+ |									  |								  |
+ | If you did not receive a copy of the license and are unable to	  |
+ | obtain it through the world-wide-web, please send an email		  |
+ | to license@phalconphp.com so we can send you a copy immediately.	  |
  +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>					  |
- |		  Eduar Carvajal <eduar@phalconphp.com>						 |
+ | Authors: Andres Gutierrez <andres@phalconphp.com>			  |
+ |		  Eduar Carvajal <eduar@phalconphp.com>			  |
  +------------------------------------------------------------------------+
  */
 
@@ -49,7 +49,7 @@ class Complex extends Resultset implements ResultsetInterface
 	 * @param Phalcon\Db\ResultInterface result
 	 * @param Phalcon\Cache\BackendInterface cache
 	 */
-	public function __construct(var columnTypes, result, <BackendInterface> cache = null)
+	public function __construct(var columnTypes, <ResultInterface> result = null, <BackendInterface> cache = null)
 	{
 		/**
 		 * Column types, tell the resultset how to build the result
@@ -64,11 +64,10 @@ class Complex extends Resultset implements ResultsetInterface
 	 */
 	public final function current() -> <ModelInterface> | boolean
 	{
-		var row, underscore, hydrateMode,
+		var row, hydrateMode,
 			dirtyState, alias, activeRow, type, columnTypes,
 			column, columnValue, value, attribute, source, attributes,
-			columnMap, rowModel, keepSnapshots, sqlAlias;
-
+			columnMap, rowModel, keepSnapshots, sqlAlias, modelName;
 
 		let activeRow = this->_activeRow;
 		if activeRow !== null {
@@ -81,7 +80,7 @@ class Complex extends Resultset implements ResultsetInterface
 		let row = this->_row;
 
 		/**
-		 * Resulset was unserialized, we do not need to hydrate
+		 * Resultset was unserialized, we do not need to hydrate
 		 */
 		if this->_disableHydration {
 			let this->_activeRow = row;
@@ -100,8 +99,6 @@ class Complex extends Resultset implements ResultsetInterface
 		 * Get current hydration mode
 		 */
 		let hydrateMode = this->_hydrateMode;
-
-		let underscore = "_";
 
 		/**
 		 * Each row in a complex result is a Phalcon\Mvc\Model\Row instance
@@ -157,7 +154,7 @@ class Complex extends Resultset implements ResultsetInterface
 					/**
 					 * Columns are supposed to be in the form _table_field
 					 */
-					let columnValue = row[underscore . source . underscore. attribute],
+					let columnValue = row["_" . source . "_". attribute],
 						rowModel[attribute] = columnValue;
 				}
 
@@ -168,24 +165,35 @@ class Complex extends Resultset implements ResultsetInterface
 
 					case Resultset::HYDRATE_RECORDS:
 
-						/**
-						 * Check if the resultset must keep snapshots
-						 */
+						// Check if the resultset must keep snapshots
 						if !fetch keepSnapshots, column["keepSnapshots"] {
 							let keepSnapshots = false;
 						}
 
-						/**
-						 * Get the base instance
-						 * Assign the values to the attributes using a column map
-						 */
-						let value = Model::cloneResultMap(column["instance"], rowModel, columnMap, dirtyState, keepSnapshots);
+						if globals_get("orm.late_state_binding") {
+
+							if column["instance"] instanceof Model {
+								let modelName = get_class(column["instance"]);
+							} else {
+								let modelName = "Phalcon\\Mvc\\Model";
+							}
+
+							let value = {modelName}::cloneResultMap(
+								column["instance"], rowModel, columnMap, dirtyState, keepSnapshots
+							);
+
+						} else {
+
+							// Get the base instance
+						 	// Assign the values to the attributes using a column map
+							let value = Model::cloneResultMap(
+								column["instance"], rowModel, columnMap, dirtyState, keepSnapshots
+							);
+						}
 						break;
 
 					default:
-						/**
-		 				 * Other kinds of hydrations
-		 				 */
+						// Other kinds of hydrations
 						let value = Model::cloneResultMapHydrate(rowModel, columnMap, hydrateMode);
 						break;
 				}
@@ -212,7 +220,7 @@ class Complex extends Resultset implements ResultsetInterface
 				if isset column["balias"] {
 					let attribute = alias;
 				} else {
-					let attribute = str_replace(underscore, "", alias);
+					let attribute = str_replace("_", "", alias);
 				}
 			}
 
@@ -254,10 +262,8 @@ class Complex extends Resultset implements ResultsetInterface
 
 	/**
 	 * Serializing a resultset will dump all related rows into a big array
-	 *
-	 * @return string
 	 */
-	public function serialize()
+	public function serialize() -> string
 	{
 		var records, cache, columnTypes, hydrateMode, serialized;
 
@@ -276,13 +282,6 @@ class Complex extends Resultset implements ResultsetInterface
 			"columnTypes" : columnTypes,
 			"hydrateMode" : hydrateMode
 		]);
-
-		/**
-		 * Avoid return bad serialized data
-		 */
-		if typeof serialized != "string" {
-			return null;
-		}
 
 		return serialized;
 	}
@@ -310,5 +309,4 @@ class Complex extends Resultset implements ResultsetInterface
 			this->_columnTypes = resultset["columnTypes"],
 			this->_hydrateMode = resultset["hydrateMode"];
 	}
-
 }

@@ -23,11 +23,11 @@
  * <code>
  * $di = new \Phalcon\Di();
  *
- * $di->set('collectionManager', function(){
+ * $di->set('collectionManager', function() {
  *      return new \Phalcon\Mvc\Collection\Manager();
  * });
  *
- * robot = new Robots(di);
+ * $robot = new Robots(di);
  * </code>
  */
 ZEPHIR_INIT_CLASS(Phalcon_Mvc_Collection_ManagerInterface) {
@@ -80,9 +80,6 @@ ZEPHIR_DOC_METHOD(Phalcon_Mvc_Collection_ManagerInterface, isUsingImplicitObject
 
 /**
  * Returns the connection related to a model
- *
- * @param Phalcon\Mvc\CollectionInterface model
- * @return Phalcon\Db\AdapterInterface
  */
 ZEPHIR_DOC_METHOD(Phalcon_Mvc_Collection_ManagerInterface, getConnection);
 
@@ -91,4 +88,9 @@ ZEPHIR_DOC_METHOD(Phalcon_Mvc_Collection_ManagerInterface, getConnection);
  * Notify the behaviors that are listening in the model
  */
 ZEPHIR_DOC_METHOD(Phalcon_Mvc_Collection_ManagerInterface, notifyEvent);
+
+/**
+ * Binds a behavior to a collection
+ */
+ZEPHIR_DOC_METHOD(Phalcon_Mvc_Collection_ManagerInterface, addBehavior);
 

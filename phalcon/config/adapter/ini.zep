@@ -72,11 +72,17 @@ class Ini extends Config
 		let config = [];
 
 		for section, directives in iniConfig {
-			let sections = [];
-			for path, lastValue in directives {
-				let sections[] = this->_parseIniString(path, lastValue);
+			if typeof directives == "array" {
+				let sections = [];
+				for path, lastValue in directives {
+					let sections[] = this->_parseIniString(path, lastValue);
+				}
+				if count(sections) {
+					let config[section] = call_user_func_array("array_merge_recursive", sections);
+				}
+			} else {
+				let config[section] = directives;
 			}
-			let config[section] = call_user_func_array("array_merge_recursive", sections);
 		}
 
 		parent::__construct(config);
@@ -97,10 +103,6 @@ class Ini extends Config
 	 *      ],
 	 * ];
 	 * </code>
-	 * @param string path
-	 * @param mixed value
-	 *
-	 * @return array parsed path
 	 */
 	protected function _parseIniString(string! path, var value) -> array
 	{

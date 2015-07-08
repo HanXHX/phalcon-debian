@@ -3,7 +3,7 @@
   +------------------------------------------------------------------------+
   | Phalcon Framework                                                      |
   +------------------------------------------------------------------------+
-  | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+  | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
   +------------------------------------------------------------------------+
   | This source file is subject to the New BSD License that is bundled     |
   | with this package in the file docs/LICENSE.txt.                        |
@@ -42,6 +42,31 @@ int phql_get_token(phql_scanner_state *s, phql_scanner_token *token) {
 		re2c:indent:top = 2;
 		re2c:yyfill:enable = 0;
 
+		HINTEGER = [x0-9A-Fa-f]+;
+		HINTEGER {
+            token->value = estrndup(q, YYCURSOR - q);
+            token->len = YYCURSOR - q;
+            if (token->len > 2 && !memcmp(token->value, "0x", 2)) {
+			    token->opcode = PHQL_T_HINTEGER;
+            } else {
+                int i, alpha = 0;
+                for (i = 0; i < token->len; i++) {
+                    unsigned char ch = token->value[i];
+                    if (!((ch >= '0') && (ch <= '9'))) {
+                        alpha = 1;
+                        break;
+                    }
+                }
+                if (alpha) {
+                    token->opcode = PHQL_T_IDENTIFIER;
+                } else {
+                    token->opcode = PHQL_T_INTEGER;
+                }
+            }
+			q = YYCURSOR;
+			return 0;
+		}
+
 		INTEGER = [0-9]+;
 		INTEGER {
 			token->opcode = PHQL_T_INTEGER;
@@ -72,6 +97,15 @@ int phql_get_token(phql_scanner_state *s, phql_scanner_token *token) {
 		SPLACEHOLDER = ":"[a-zA-Z0-9\_\-]+":";
 		SPLACEHOLDER {
 			token->opcode = PHQL_T_SPLACEHOLDER;
+			token->value = estrndup(q, YYCURSOR - q - 1);
+			token->len = YYCURSOR - q - 1;
+			q = YYCURSOR;
+			return 0;
+		}
+
+		BPLACEHOLDER = "{"[a-zA-Z0-9\_\-\:]+"}";
+		BPLACEHOLDER {
+			token->opcode = PHQL_T_BPLACEHOLDER;
 			token->value = estrndup(q, YYCURSOR - q - 1);
 			token->len = YYCURSOR - q - 1;
 			q = YYCURSOR;
@@ -283,6 +317,11 @@ int phql_get_token(phql_scanner_state *s, phql_scanner_token *token) {
 			return 0;
 		}
 
+        'EXISTS' {
+			token->opcode = PHQL_T_EXISTS;
+			return 0;
+		}
+
 		'TRUE' {
 			token->opcode = PHQL_T_TRUE;
 			return 0;
@@ -290,6 +329,41 @@ int phql_get_token(phql_scanner_state *s, phql_scanner_token *token) {
 
 		'FALSE' {
 			token->opcode = PHQL_T_FALSE;
+			return 0;
+		}
+
+        'CASE' {
+			token->opcode = PHQL_T_CASE;
+			return 0;
+		}
+
+        'WHEN' {
+			token->opcode = PHQL_T_WHEN;
+			return 0;
+		}
+
+        'THEN' {
+			token->opcode = PHQL_T_THEN;
+			return 0;
+		}
+
+        'ELSE' {
+			token->opcode = PHQL_T_ELSE;
+			return 0;
+		}
+
+        'END' {
+			token->opcode = PHQL_T_END;
+			return 0;
+		}
+
+		'FOR' {
+			token->opcode = PHQL_T_FOR;
+			return 0;
+		}
+
+        'WITH' {
+			token->opcode = PHQL_T_WITH;
 			return 0;
 		}
 
@@ -302,7 +376,7 @@ int phql_get_token(phql_scanner_state *s, phql_scanner_token *token) {
 			return 0;
 		}
 
-		IDENTIFIER = [\\]?[a-zA-Z\_][a-zA-Z0-9\_\\]*;
+		IDENTIFIER = [\\]?[a-zA-Z\_][a-zA-Z0-9\_\\:]*;
 		IDENTIFIER {
 			token->opcode = PHQL_T_IDENTIFIER;
 			if ((YYCURSOR - q) > 1) {
@@ -321,7 +395,7 @@ int phql_get_token(phql_scanner_state *s, phql_scanner_token *token) {
 			return 0;
 		}
 
-		EIDENTIFIER = [\[] [a-zA-Z\\\_][a-zA-Z0-9\_\\]* [\]];
+		EIDENTIFIER = [\[] [a-zA-Z\\\_][a-zA-Z0-9\_\\:]* [\]];
 		EIDENTIFIER {
 			token->opcode = PHQL_T_IDENTIFIER;
 			token->value = estrndup(q, YYCURSOR - q - 1);

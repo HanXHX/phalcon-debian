@@ -67,7 +67,7 @@ class Simple extends Resultset
 	 */
 	public final function current() -> <ModelInterface> | boolean
 	{
-		var row, hydrateMode, columnMap, activeRow;
+		var row, hydrateMode, columnMap, activeRow, modelName;
 
 		let activeRow = this->_activeRow;
 		if activeRow !== null {
@@ -103,17 +103,35 @@ class Simple extends Resultset
 		switch hydrateMode {
 
 			case Resultset::HYDRATE_RECORDS:
+
 				/**
 				 * Set records as dirty state PERSISTENT by default
 				 * Performs the standard hydration based on objects
 				 */
-				let activeRow = Model::cloneResultMap(
-					this->_model,
-					row,
-					columnMap,
-					Model::DIRTY_STATE_PERSISTENT,
-					this->_keepSnapshots
-				);
+				if globals_get("orm.late_state_binding") {
+
+					if this->_model instanceof \Phalcon\Mvc\Model {
+						let modelName = get_class(this->_model);
+					} else {
+						let modelName = "Phalcon\\Mvc\\Model";
+					}
+
+					let activeRow = {modelName}::cloneResultMap(
+						this->_model,
+						row,
+						columnMap,
+						Model::DIRTY_STATE_PERSISTENT,
+						this->_keepSnapshots
+					);
+				} else {
+					let activeRow = Model::cloneResultMap(
+						this->_model,
+						row,
+						columnMap,
+						Model::DIRTY_STATE_PERSISTENT,
+						this->_keepSnapshots
+					);
+				}
 				break;
 
 			default:
@@ -182,10 +200,16 @@ class Simple extends Resultset
 							throw new Exception("Column '" . key . "' is not part of the column map");
 						}
 
-						/**
-						 * Add the value renamed
-						 */
-						let renamed[renamedKey] = value;
+                        if typeof renamedKey == "array" {
+
+		                    if !fetch renamedKey, renamedKey[0] {
+                	            throw new Exception("Column '" . key . "' is not part of the column map");
+                        	}
+
+							let renamed[renamedKey[0]] = value;
+		                } else {
+							let renamed[renamedKey] = value;
+						}
 					}
 
 					/**
