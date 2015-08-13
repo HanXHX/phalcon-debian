@@ -310,16 +310,9 @@ class Tag
 	public static function hasValue(var name) -> boolean
 	{
 		/**
-		 * Check if there is a predefined value for it
+		 * Check if there is a predefined or a POST value for it
 		 */
-		if isset self::_displayValues[name] {
-			return true;
-		}
-
-		/**
-		 * Check if there is a post value for the item
-		 */
-		return isset _POST[name];
+		return isset self::_displayValues[name] || isset _POST[name];
 	}
 
 	/**
@@ -1322,7 +1315,7 @@ class Tag
 	 * @param string separator
 	 * @param boolean lowercase
 	 * @param mixed replace
-	 * @return text
+	 * @return string
 	 */
 	public static function friendlyTitle(string text, string separator = "-", boolean lowercase = true, replace = null) -> string
 	{

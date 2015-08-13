@@ -516,11 +516,7 @@ PHP_METHOD(Phalcon_Logger_Adapter, alert) {
 }
 
 /**
- * Logs messages to the internal logger. Appends logs to the logger
- * @param mixed type
- * @param mixed message
- * @param mixed context
- * @return Phalcon\Logger\AdapterInterface
+ * Logs messages to the internal logger. Appends logs to the logger	 
  */
 PHP_METHOD(Phalcon_Logger_Adapter, log) {
 
@@ -569,7 +565,7 @@ PHP_METHOD(Phalcon_Logger_Adapter, log) {
 		ZVAL_LONG(toggledType, 7);
 	}
 	_2 = zephir_fetch_nproperty_this(this_ptr, SL("_logLevel"), PH_NOISY_CC);
-	if (ZEPHIR_GE(_2, type)) {
+	if (ZEPHIR_GE(_2, toggledType)) {
 		ZEPHIR_INIT_VAR(timestamp);
 		zephir_time(timestamp);
 		_3 = zephir_fetch_nproperty_this(this_ptr, SL("_transaction"), PH_NOISY_CC);

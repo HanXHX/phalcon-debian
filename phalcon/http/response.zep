@@ -329,10 +329,9 @@ class Response implements ResponseInterface, InjectionAwareInterface
 	 */
 	public function setExpires(<\DateTime> datetime) -> <Response>
 	{
-		var headers, date;
+		var date;
 
-		let headers = this->getHeaders(),
-			date = clone datetime;
+		let date = clone datetime;
 
 		/**
 		 * All the expiration times are sent in UTC
@@ -344,6 +343,26 @@ class Response implements ResponseInterface, InjectionAwareInterface
 		 * The 'Expires' header set this info
 		 */
 		this->setHeader("Expires", date->format("D, d M Y H:i:s") . " GMT");
+		return this;
+	}
+
+	/**
+	 * Sets Cache headers to use HTTP cache
+	 *
+	 *<code>
+	 *	$this->response->setCache(60);
+	 *</code>
+	 */
+	public function setCache(int! minutes) -> <Response>
+	{
+		var date;
+
+		let date = new \DateTime();
+		date->modify("+" . minutes . " minutes");
+
+		this->setExpires(date);
+		this->setHeader("Cache-Control", "max-age=" . (minutes * 60));
+
 		return this;
 	}
 

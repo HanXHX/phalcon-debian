@@ -489,7 +489,7 @@ class Gd extends Adapter implements AdapterInterface
 
 				let x2 = x + amount;
 				let y2 = y + amount;
-				imagefilledrectangle(this->_image, x1, y1, x2, y2, color);
+				imagefilledrectangle(this->_image, x, y, x2, y2, color);
 
 				let y += amount;
 			}
@@ -540,7 +540,7 @@ class Gd extends Adapter implements AdapterInterface
 	protected function _render(string ext, int quality)
 	{
 		let ext = strtolower(ext);
-                ob_start();
+		ob_start();
 		if strcmp(ext, "gif") == 0 {
 			imagegif(this->_image);
 			return ob_get_clean();
