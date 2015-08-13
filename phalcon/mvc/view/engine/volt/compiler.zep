@@ -432,7 +432,7 @@ class Compiler implements InjectionAwareInterface
 			 * Check if the function name is a macro
 			 */
 			if isset this->_macros[name] {
-				return "$vmacro_" . name . "(array(" . arguments . "))";
+				return "$this->callMacro('" . name . "', array(" . arguments . "))";
 			}
 
 			/**
@@ -513,6 +513,7 @@ class Compiler implements InjectionAwareInterface
 						"text_field": true,
 						"email_field": true,
 						"date_field": true,
+						"tel_field": true,
 						"numeric_field": true,
 						"image_input": true
 					];
@@ -1889,7 +1890,7 @@ class Compiler implements InjectionAwareInterface
 		 */
 		let this->_macros[name] = name;
 
-		let macroName = "$vmacro_" . name;
+		let macroName = "$this->_macros['" . name . "']";
 
 		let code = "<?php ";
 
@@ -1914,7 +1915,7 @@ class Compiler implements InjectionAwareInterface
 				if fetch defaultValue, parameter["default"] {
 					let code .= "$" . variableName . " = " . this->expression(defaultValue) . ";";
 				} else {
-					let code .= " throw new \\Phalcon\\Mvc\\View\\Exception(\"Macro " . name . " was called without parameter: " . variableName . "\"); ";
+					let code .= " throw new \\Phalcon\\Mvc\\View\\Exception(\"Macro '" . name . "' was called without parameter: " . variableName . "\"); ";
 				}
 				let code .= " } } ";
 			}

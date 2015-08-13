@@ -19,11 +19,11 @@
 
 namespace Phalcon\Logger;
 
+use Phalcon\Logger;
+use Phalcon\Logger\Item;
+use Phalcon\Logger\Exception;
 use Phalcon\Logger\AdapterInterface;
 use Phalcon\Logger\FormatterInterface;
-use Phalcon\Logger\Exception;
-use Phalcon\Logger\Item;
-use Phalcon\Logger;
 
 /**
  * Phalcon\Logger\Adapter
@@ -218,13 +218,9 @@ abstract class Adapter
 	}
 
 	/**
-	 * Logs messages to the internal logger. Appends logs to the logger
-	 * @param mixed type
-	 * @param mixed message
-	 * @param mixed context
-	 * @return Phalcon\Logger\AdapterInterface
+	 * Logs messages to the internal logger. Appends logs to the logger	 
 	 */
-	inline public function log(var type, var message = null, array! context = null) -> <AdapterInterface>
+	public function log(var type, var message = null, array! context = null) -> <AdapterInterface>
 	{
 		var timestamp, toggledMessage, toggledType;
 
@@ -248,7 +244,7 @@ abstract class Adapter
 		/**
 		 * Checks if the log is valid respecting the current log level
 		 */
-		if this->_logLevel >= type {
+		if this->_logLevel >= toggledType {
 			let timestamp = time();
 			if this->_transaction {
 				let this->_queue[] = new Item(toggledMessage, toggledType, timestamp, context);

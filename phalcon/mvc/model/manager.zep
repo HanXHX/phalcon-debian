@@ -1129,7 +1129,7 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 				if key === 0 || key === "conditions" {
 					if !isset findParams[0] {
 						let findParams[0] = value;
-					} else {						
+					} else {
 						let findParams[0] = "(" . findParams[0] . ") AND " . value;
 					}
 					continue;
@@ -1249,7 +1249,7 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 			 * We don't trust the user or the database so we use bound parameters
 			 * Create a query builder
 			 */
-			let builder = this->createBuilder(parameters);
+			let builder = this->createBuilder(this->_mergeFindParameters(extraParameters, parameters));
 
 			builder->from(referencedModel);
 			builder->innerJoin(intermediateModel, join(" AND ", joinConditions));
@@ -1707,7 +1707,7 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 	}
 
 	/**
-	 * Returns the lastest query created or executed in the models manager
+	 * Returns the last query created or executed in the models manager
 	 */
 	public function getLastQuery() -> <QueryInterface>
 	{

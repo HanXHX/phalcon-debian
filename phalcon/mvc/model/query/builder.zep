@@ -1315,7 +1315,7 @@ class Builder implements BuilderInterface, InjectionAwareInterface
 				}
 			}
 
-			if is_numeric(limit) {
+			if is_numeric(number) {
 
 				let hiddenParam = this->_hiddenParamNumber,
 					phql .= " LIMIT :AP" . hiddenParam . ":",
