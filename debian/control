@@ -2,7 +2,7 @@ Source: php5-phalcon
 Section: php
 Priority: optional
 Maintainer: Emilien Mantel <emilien.mantel@debianiste.org>
-Build-Depends: debhelper (>= 8.0.0), php5-dev, libpcre3-dev, gcc, make, php5-mysql
+Build-Depends: debhelper (>= 8.0.0), php5-dev, libpcre3-dev, gcc, make, php5-mysqlnd
 Standards-Version: 3.9.4
 Homepage: http://phalconphp.com
 Vcs-Git: git://github.com/phalcon/cphalcon.git
