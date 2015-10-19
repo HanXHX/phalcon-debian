@@ -3,7 +3,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-export CFLAGS += -fvisibility=hidden -DPHALCON_RELEASE -march=native -mtune=native -O2 -fomit-frame-pointer
+export CFLAGS += -fvisibility=hidden -DPHALCON_RELEASE -O2 -fomit-frame-pointer
 
 PHALCON_DIR    = build/safe
 DEB_HOST_ARCH ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
