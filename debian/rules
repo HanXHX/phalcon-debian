@@ -7,7 +7,7 @@ export CFLAGS += -fvisibility=hidden -DPHALCON_RELEASE -O2 -fomit-frame-pointer
 
 PHALCON_DIR    = build/safe
 DEB_HOST_ARCH ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
-PHPAPI = $(shell php-config --phpapi)
+PHPAPI = $(shell php-config7.0 --phpapi)
 
 ifeq ($(DEB_HOST_ARCH),$(filter $(DEB_HOST_ARCH),i386))
 	PHALCON_DIR = build/32bits
@@ -22,31 +22,31 @@ endif
 	dh $@
 
 override_dh_auto_configure:
-	(cd $(PHALCON_DIR); phpize5; ./configure --enable-phalcon=shared)
+	(cd $(PHALCON_DIR); phpize7.0; ./configure --enable-phalcon=shared)
 
 override_dh_auto_build:
 	$(MAKE) -C $(PHALCON_DIR)
-	echo "$(PHALCON_DIR)/modules/phalcon.so usr/lib/php5/$(PHPAPI)" > debian/php5-phalcon.install
-	echo "debian/phalcon.ini etc/php5/mods-available" >> debian/php5-phalcon.install
+	echo "$(PHALCON_DIR)/modules/phalcon.so usr/lib/php/$(PHPAPI)" > debian/php7.0-phalcon.install
+	echo "debian/phalcon.ini etc/php/7.0/mods-available/" >> debian/php7.0-phalcon.install
 
 override_dh_auto_clean:
 	dh_auto_clean
 	( \
 		cd $(PHALCON_DIR); \
 		[ -f Makefile ] && $(MAKE) distclean; \
-		phpize5 --clean; \
+		phpize7.0 --clean; \
 		rm -f tmp-php.ini; \
 	)
 
 override_dh_clean:
-	rm -f debian/php5-phalcon.substvars
-	rm -f debian/php5-phalcon.install
+	rm -f debian/php7.0-phalcon.substvars
+	rm -f debian/php7.0-phalcon.install
 	dh_clean
 
 override_dh_auto_install:
-	$(MAKE) -C $(PHALCON_DIR) install INSTALL_ROOT=../../../debian/php5-phalcon
+	$(MAKE) -C $(PHALCON_DIR) install INSTALL_ROOT=../../../debian/php7.0-phalcon
 
 override_dh_gencontrol:
-	echo "php:Depends=phpapi-`php-config5 --phpapi`" >> debian/php5-phalcon.substvars
+	echo "php:Depends=phpapi-`php-config-7.0 --phpapi`" >> debian/php7.0-phalcon.substvars
 	dh_gencontrol
 
