@@ -11,6 +11,8 @@ Vcs-Browser: https://github.com/phalcon/cphalcon
 Package: php7.0-phalcon
 Architecture: i386 amd64 
 Depends: ${shlibs:Depends}, ${php:Depends}, ${misc:Depends}
+Breaks: php5-phalcon (<< 2.0.10-1)
+Replaces: php5-phalcon (<< 2.0.10-1)
 Recommends: php7.0-mcrypt, openssl (>= 1.0.1e)
 Suggests: php7.0-mysql, php7.0-sqlite3, php7.0-pgsql, php7.0-mongodb, php7.0-memcached
 Description: Phalcon Module for PHP 7.0

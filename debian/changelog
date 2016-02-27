@@ -1,3 +1,9 @@
+php7.0-phalcon (2.1.0~git0294464-1) unstable; urgency=medium
+
+  * Upstream version: 2.1.x (from git branch)
+
+ -- Emilien Mantel <emilien.mantel@debianiste.org>  Sat, 27 Feb 2016 14:53:40 +0000
+
 php5-phalcon (2.0.10-1) unstable; urgency=medium
 
   * New upstream version: 2.0.10 
